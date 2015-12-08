@@ -1,11 +1,9 @@
 import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -24,7 +22,8 @@ public class Main extends Application{
 
 	FieldCell[] addShip;
 	Label[] addShipCount;
-	ToggleButton orientation;
+	Button orientation;
+	UserAddShipHandler addShipHandler;
 	public void start(Stage mainStage){
 		root = new GridPane();
 
@@ -44,16 +43,16 @@ public class Main extends Application{
 		}
 
 		Label label = new Label("sd");
-		ClickHandler<ActionEvent> handler = new ClickHandler<>(user, orientation);
-		root.add(label, 10, 1);
-
-
+		orientation = new Button("H");
 		user = new FieldCell[10][10];
 		cpu = new FieldCell[10][10];
+		addShipHandler = new UserAddShipHandler<>(user, orientation);
+		root.add(label, 10, 1);
+
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
 				user[i][j] = new FieldCell(i, j);
-				user[i][j].setOnAction(handler);// TODO: 08.12.2015 reconstruct this handler later
+				user[i][j].setOnAction(addShipHandler);
 				cpu[i][j] = new FieldCell(i, j);
 				root.add(user[i][j], j, i);
 				root.add(cpu[i][j], j + 11, i);
@@ -65,22 +64,26 @@ public class Main extends Application{
 		for (int i = 0; i < 4; i++) {
 			addShip[i] = new FieldCell(StatusEnum.unbroken, Integer.toString(i + 1));
 			addShipCount[i] = new Label(Integer.toString(4 - i));
-
+			Integer fi = i;
+			addShip[i].setOnAction(event -> {
+				Button button = (Button) event.getSource();
+				addShipHandler.setLength(Integer.parseInt(button.getText()));
+				addShipHandler.setCount(addShipCount[fi]);
+			});
 			root.add(addShip[i], 1, 11 + i);
 			root.add(addShipCount[i], 2, 11 + i);
 		}
-		orientation = new ToggleButton("H");
+
 		orientation.setPrefSize(30, 30);
 		orientation.setOnAction(event -> {
-			ToggleButton button = (ToggleButton) event.getSource();
-			if (button.isSelected()){
+			Button button = (Button) event.getSource();
+			if (button.getText().equals("H")){
 				button.setText("V");
 				return;
 			}
 			button.setText("H");
 		});
 		root.add(orientation, 3, 12);
-
 
 		mainStage.show();
 	}

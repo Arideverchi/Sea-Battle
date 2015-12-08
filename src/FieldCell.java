@@ -21,10 +21,11 @@ class FieldCell extends Button {
 		this.setPrefSize(30,30);
 	}
 
-	public void changeShowStatus(StatusEnum status){
+	public void setShowStatus(StatusEnum status){
 		this.showStatus = status;
 		setStatusStyle(status);
 	}
+
 
 	private void setStatusStyle(StatusEnum status){
 		switch (status){

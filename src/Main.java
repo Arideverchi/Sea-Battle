@@ -1,4 +1,6 @@
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
@@ -46,9 +48,11 @@ public class Main extends Application{
 				root.getChildren().removeAll(Arrays.asList(addShip));
 				root.getChildren().removeAll(Arrays.asList(addShipCount));
 				fillCpuField();
+				FireHandler<ActionEvent> fireHandler = new FireHandler<>(user, cpu, mainStage, this);
 				for (int i = 0; i < 10; i++) {
 					for (int j = 0; j < 10; j++) {
-						cpu[i][j].setShowStatus(cpu[i][j].trueStatus);
+						cpu[i][j].setShowStatus(cpu[i][j].trueStatus);// TODO: 10.12.2015 hide this in the end
+						cpu[i][j].setOnAction(fireHandler);
 					}
 				}
 			}else {
@@ -60,13 +64,20 @@ public class Main extends Application{
 		});
 		root.add(startButton, 7, 11, 2, 1);
 
+		Button restart = new Button("restart");
+		restart.setOnAction(event -> {
+			mainStage.close();
+			start(mainStage);
+		});
+		root.add(restart, 9, 11, 2 ,1);
+
 		mainStage.show();
 	}
 
 	private void clearUserField(){
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
-				user[i][j].setShowStatus(StatusEnum.clear);
+				user[i][j].setShowStatus(Status.clear);
 			}
 		}
 		addShipHandler.setLength(0);
@@ -77,6 +88,8 @@ public class Main extends Application{
 		userShips = 0;
 	}
 	private void prepareWindow(Stage mainStage){
+		mainStage.setTitle("Sea Battle");
+
 		root = new GridPane();
 		this.mainStage = mainStage;
 		mainScene = new Scene(root, 630, 500);
@@ -94,6 +107,8 @@ public class Main extends Application{
 			root.getRowConstraints().add(row);
 		}
 
+		userShips = 0;
+		cpuShips = 0;
 
 	}
 	private void createFields(){
@@ -117,7 +132,7 @@ public class Main extends Application{
 		addShip = new FieldCell[4];
 		addShipCount = new Label[4];
 		for (int i = 0; i < 4; i++) {
-			addShip[i] = new FieldCell(StatusEnum.unbroken, Integer.toString(i + 1));
+			addShip[i] = new FieldCell(Status.unbroken, Integer.toString(i + 1));
 			addShipCount[i] = new Label(Integer.toString(4 - i));
 			Integer fi = i;
 			addShip[i].setOnAction(event -> {
@@ -141,9 +156,7 @@ public class Main extends Application{
 		root.add(orientation, 3, 12);
 
 		clearField = new Button("Clear");
-		clearField.setOnAction(event -> {
-			clearUserField();
-		});
+		clearField.setOnAction(event -> Main.this.clearUserField());
 		root.add(clearField, 5 , 11, 2, 1);
 	}
 	private void fillCpuField(){
@@ -194,12 +207,12 @@ public class Main extends Application{
 		switch (orientation){
 			case 0:
 				for (int i = 0; i <length ; i++) {
-					cpu[x][y + i].trueStatus = StatusEnum.unbroken;
+					cpu[x][y + i].trueStatus = Status.unbroken;
 				}
 				break;
 			case 1:
 				for (int i = 0; i < length; i++) {
-					cpu[x + i][y].trueStatus = StatusEnum.unbroken;
+					cpu[x + i][y].trueStatus = Status.unbroken;
 				}
 				break;
 		}
@@ -229,22 +242,22 @@ public class Main extends Application{
 	private Boolean checkField(int x, int y){
 		Boolean result = Boolean.TRUE;
 		if (x > 0)
-			result = !cpu[x - 1][y].trueStatus.equals(StatusEnum.unbroken);
+			result = !cpu[x - 1][y].trueStatus.equals(Status.unbroken);
 		if (y > 0)
-			result = !cpu[x][y - 1].trueStatus.equals(StatusEnum.unbroken) && result;
+			result = !cpu[x][y - 1].trueStatus.equals(Status.unbroken) && result;
 		if (x < 9)
-			result = !cpu[x + 1][y].trueStatus.equals(StatusEnum.unbroken) && result;
+			result = !cpu[x + 1][y].trueStatus.equals(Status.unbroken) && result;
 		if (y < 9)
-			result = !cpu[x][y + 1].trueStatus.equals(StatusEnum.unbroken) && result;
+			result = !cpu[x][y + 1].trueStatus.equals(Status.unbroken) && result;
 		if (x > 0 && y > 0)
-			result = !cpu[x - 1][y - 1].trueStatus.equals(StatusEnum.unbroken) && result;
+			result = !cpu[x - 1][y - 1].trueStatus.equals(Status.unbroken) && result;
 		if (x > 0 && y < 9)
-			result = !cpu[x - 1][y + 1].trueStatus.equals(StatusEnum.unbroken) && result;
+			result = !cpu[x - 1][y + 1].trueStatus.equals(Status.unbroken) && result;
 		if (x < 9 && y < 9)
-			result = !cpu[x + 1][y + 1].trueStatus.equals(StatusEnum.unbroken) && result;
+			result = !cpu[x + 1][y + 1].trueStatus.equals(Status.unbroken) && result;
 		if (x < 9 && y > 0)
-			result = !cpu[x + 1][y - 1].trueStatus.equals(StatusEnum.unbroken) && result;
-		result = !cpu[x][y].trueStatus.equals(StatusEnum.missed) && result;
+			result = !cpu[x + 1][y - 1].trueStatus.equals(Status.unbroken) && result;
+		result = !cpu[x][y].trueStatus.equals(Status.missed) && result;
 		return result;
 	}
 }

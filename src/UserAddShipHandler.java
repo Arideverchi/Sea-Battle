@@ -1,6 +1,5 @@
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 class UserAddShipHandler<T extends Event> implements EventHandler {
@@ -28,9 +27,9 @@ class UserAddShipHandler<T extends Event> implements EventHandler {
 			return;
 		for (int i = 0; i < length; i++) {
 			if(main.orientation.getText().equals("H")){
-				main.user[button.x][button.y + i].setShowStatus(StatusEnum.unbroken);
+				main.user[button.x][button.y + i].setShowStatus(Status.unbroken);
 			}else {
-				main.user[button.x + i][button.y].setShowStatus(StatusEnum.unbroken);
+				main.user[button.x + i][button.y].setShowStatus(Status.unbroken);
 			}
 		}
 		Integer k = Integer.parseInt( count.getText()) - 1;
@@ -69,21 +68,21 @@ class UserAddShipHandler<T extends Event> implements EventHandler {
 	private Boolean checkField(int x, int y){
 		Boolean result = Boolean.TRUE;
 		if (x > 0)
-			result = !main.user[x - 1][y].getShowStatus().equals(StatusEnum.unbroken);
+			result = !main.user[x - 1][y].getShowStatus().equals(Status.unbroken);
 		if (y > 0)
-			result = !main.user[x][y - 1].getShowStatus().equals(StatusEnum.unbroken) && result;
+			result = !main.user[x][y - 1].getShowStatus().equals(Status.unbroken) && result;
 		if (x < 9)
-			result = !main.user[x + 1][y].getShowStatus().equals(StatusEnum.unbroken) && result;
+			result = !main.user[x + 1][y].getShowStatus().equals(Status.unbroken) && result;
 		if (y < 9)
-			result = !main.user[x][y + 1].getShowStatus().equals(StatusEnum.unbroken) && result;
+			result = !main.user[x][y + 1].getShowStatus().equals(Status.unbroken) && result;
 		if (x > 0 && y > 0)
-			result = !main.user[x - 1][y - 1].getShowStatus().equals(StatusEnum.unbroken) && result;
+			result = !main.user[x - 1][y - 1].getShowStatus().equals(Status.unbroken) && result;
 		if (x > 0 && y < 9)
-			result = !main.user[x - 1][y + 1].getShowStatus().equals(StatusEnum.unbroken) && result;
+			result = !main.user[x - 1][y + 1].getShowStatus().equals(Status.unbroken) && result;
 		if (x < 9 && y < 9)
-			result = !main.user[x + 1][y + 1].getShowStatus().equals(StatusEnum.unbroken) && result;
+			result = !main.user[x + 1][y + 1].getShowStatus().equals(Status.unbroken) && result;
 		if (x < 9 && y > 0)
-			result = !main.user[x + 1][y - 1].getShowStatus().equals(StatusEnum.unbroken) && result;
+			result = !main.user[x + 1][y - 1].getShowStatus().equals(Status.unbroken) && result;
 		return result;
 	}
 }

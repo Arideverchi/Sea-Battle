@@ -147,7 +147,7 @@ public class Main extends Application{
 		root.add(clearField, 5 , 11, 2, 1);
 	}
 	private void fillCpuField(){
-		Integer orientation;
+
 
 		boolean flag;
 
@@ -156,8 +156,8 @@ public class Main extends Application{
 				if (i == 2 && j == 2)
 					continue;
 				do {
-					orientation = (int) (Math.random() * 2.0);
-					Integer side = (int) (Math.random() * 2.0);
+					int orientation = (int) (Math.random() * 2.0);
+					int side = (int) (Math.random() * 2.0);
 					int pos = (int)(Math.random() *(11.0 - i));
 					int x = pos * orientation + 9 * side * Math.abs(orientation - 1);
 					int y = pos * Math.abs(orientation - 1) + 9 * side * orientation;
@@ -167,9 +167,28 @@ public class Main extends Application{
 					place(x, y, orientation, i);
 				}while (!flag);
 			}
-
 		}
+		do {
+			int orientation = (int) (Math.random() * 2.0);
+			int x = (int) (Math.random() * 8.0) + 1;
+			int y = (int) (Math.random() * 8.0) + 1;
+			flag = trySet(x, y, orientation, 2);
+			if (!flag)
+				continue;
+			place(x, y, orientation, 2);
+		}while (!flag);
 
+		for (int i = 0; i < 4; i++) {
+			do {
+				int x = (int) (Math.random() * 8.0) + 1;
+				int y = (int) (Math.random() * 8.0) + 1;
+				flag = trySet(x, y, 0, 2);
+				if (!flag)
+					continue;
+				place(x, y, 0, 1);
+			}while (!flag);
+		}
+		cpuShips = 10;
 	}
 	private void place(int x, int y,int orientation, int length){
 		switch (orientation){

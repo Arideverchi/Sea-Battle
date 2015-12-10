@@ -2,7 +2,8 @@ import javafx.scene.control.Button;
 
 class FieldCell extends Button {
 	int x,y;
-	StatusEnum showStatus, trueStatus;
+	private StatusEnum showStatus;
+	StatusEnum trueStatus;
 	FieldCell(int x, int y){
 		super();
 		this.x = x;
@@ -21,6 +22,9 @@ class FieldCell extends Button {
 		this.setPrefSize(30,30);
 	}
 
+	public StatusEnum getShowStatus(){
+		return showStatus;
+	}
 	public void setShowStatus(StatusEnum status){
 		this.showStatus = status;
 		setStatusStyle(status);

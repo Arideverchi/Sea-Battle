@@ -4,7 +4,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 class UserAddShipHandler<T extends Event> implements EventHandler {
-	Button orientation;
 	Integer length;
 	Label count;
 	Main main;
@@ -70,21 +69,21 @@ class UserAddShipHandler<T extends Event> implements EventHandler {
 	private Boolean checkField(int x, int y){
 		Boolean result = Boolean.TRUE;
 		if (x > 0)
-			result = !main.user[x - 1][y].showStatus.equals(StatusEnum.unbroken);
+			result = !main.user[x - 1][y].getShowStatus().equals(StatusEnum.unbroken);
 		if (y > 0)
-			result = !main.user[x][y - 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x][y - 1].getShowStatus().equals(StatusEnum.unbroken) && result;
 		if (x < 9)
-			result = !main.user[x + 1][y].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x + 1][y].getShowStatus().equals(StatusEnum.unbroken) && result;
 		if (y < 9)
-			result = !main.user[x][y + 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x][y + 1].getShowStatus().equals(StatusEnum.unbroken) && result;
 		if (x > 0 && y > 0)
-			result = !main.user[x - 1][y - 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x - 1][y - 1].getShowStatus().equals(StatusEnum.unbroken) && result;
 		if (x > 0 && y < 9)
-			result = !main.user[x - 1][y + 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x - 1][y + 1].getShowStatus().equals(StatusEnum.unbroken) && result;
 		if (x < 9 && y < 9)
-			result = !main.user[x + 1][y + 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x + 1][y + 1].getShowStatus().equals(StatusEnum.unbroken) && result;
 		if (x < 9 && y > 0)
-			result = !main.user[x + 1][y - 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x + 1][y - 1].getShowStatus().equals(StatusEnum.unbroken) && result;
 		return result;
 	}
 }

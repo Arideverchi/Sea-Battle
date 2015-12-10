@@ -7,7 +7,7 @@ class FieldCell extends Button {
 		super();
 		this.x = x;
 		this.y = y;
-
+		trueStatus = StatusEnum.clear;
 		showStatus = StatusEnum.clear;
 		setStatusStyle(showStatus);
 		this.setPrefSize(30,30);

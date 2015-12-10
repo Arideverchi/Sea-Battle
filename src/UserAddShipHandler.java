@@ -4,10 +4,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 class UserAddShipHandler<T extends Event> implements EventHandler {
-	FieldCell[][] fieldCells;
 	Button orientation;
 	Integer length;
 	Label count;
+	Main main;
 
 	public void setLength(Integer length) {
 		this.length = length;
@@ -17,9 +17,8 @@ class UserAddShipHandler<T extends Event> implements EventHandler {
 		this.count = count;
 	}
 
-	UserAddShipHandler(FieldCell [][] fieldCells, Button toggle){
-		this.fieldCells = fieldCells;
-		this.orientation = toggle;
+	UserAddShipHandler(Main main){
+		this.main = main;
 		this.length = 0;
 		this.count = new Label("0");
 	}
@@ -29,18 +28,19 @@ class UserAddShipHandler<T extends Event> implements EventHandler {
 		if (!trySet(button.x, button.y) || count.getText().equals("0"))
 			return;
 		for (int i = 0; i < length; i++) {
-			if(orientation.getText().equals("H")){
-				fieldCells[button.x][button.y + i].setShowStatus(StatusEnum.unbroken);
+			if(main.orientation.getText().equals("H")){
+				main.user[button.x][button.y + i].setShowStatus(StatusEnum.unbroken);
 			}else {
-				fieldCells[button.x + i][button.y].setShowStatus(StatusEnum.unbroken);
+				main.user[button.x + i][button.y].setShowStatus(StatusEnum.unbroken);
 			}
 		}
 		Integer k = Integer.parseInt( count.getText()) - 1;
 		count.setText(k.toString());
+		main.userShips++;
 	}
 
 	private Boolean trySet(int x, int y){
-		if (orientation.getText().equals("H")){
+		if (main.orientation.getText().equals("H")){
 			return trySetHorizontal(x, y);
 		}
 		return trySetVertical(x, y);
@@ -70,21 +70,21 @@ class UserAddShipHandler<T extends Event> implements EventHandler {
 	private Boolean checkField(int x, int y){
 		Boolean result = Boolean.TRUE;
 		if (x > 0)
-			result = !fieldCells[x - 1][y].showStatus.equals(StatusEnum.unbroken);
+			result = !main.user[x - 1][y].showStatus.equals(StatusEnum.unbroken);
 		if (y > 0)
-			result = !fieldCells[x][y - 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x][y - 1].showStatus.equals(StatusEnum.unbroken) && result;
 		if (x < 9)
-			result = !fieldCells[x + 1][y].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x + 1][y].showStatus.equals(StatusEnum.unbroken) && result;
 		if (y < 9)
-			result = !fieldCells[x][y + 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x][y + 1].showStatus.equals(StatusEnum.unbroken) && result;
 		if (x > 0 && y > 0)
-			result = !fieldCells[x - 1][y - 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x - 1][y - 1].showStatus.equals(StatusEnum.unbroken) && result;
 		if (x > 0 && y < 9)
-			result = !fieldCells[x - 1][y + 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x - 1][y + 1].showStatus.equals(StatusEnum.unbroken) && result;
 		if (x < 9 && y < 9)
-			result = !fieldCells[x + 1][y + 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x + 1][y + 1].showStatus.equals(StatusEnum.unbroken) && result;
 		if (x < 9 && y > 0)
-			result = !fieldCells[x + 1][y - 1].showStatus.equals(StatusEnum.unbroken) && result;
+			result = !main.user[x + 1][y - 1].showStatus.equals(StatusEnum.unbroken) && result;
 		return result;
 	}
 }

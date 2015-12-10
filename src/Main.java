@@ -2,10 +2,13 @@ import javafx.application.Application;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
+
+import java.util.Arrays;
 
 /**
  * The Great Sea Battle app
@@ -18,15 +21,64 @@ public class Main extends Application{
 	FieldCell [][]user;
 	FieldCell [][]cpu;
 	Scene mainScene;
+	Stage mainStage;
 	GridPane root;
+	Button startButton;
+	Integer userShips = 0, cpuShips = 0;
 
 	FieldCell[] addShip;
 	Label[] addShipCount;
 	Button orientation;
+	Button clearField;
 	UserAddShipHandler addShipHandler;
-	public void start(Stage mainStage){
-		root = new GridPane();
 
+
+	public void start(Stage mainStage){
+		prepareWindow(mainStage);
+		createFields();
+		createAddButtons();
+
+
+		startButton = new Button("Start");
+		startButton.setOnAction(event -> {
+			if(userShips.equals(10)){
+				root.getChildren().removeAll(orientation, clearField, startButton);
+				root.getChildren().removeAll(Arrays.asList(addShip));
+				root.getChildren().removeAll(Arrays.asList(addShipCount));
+				fillCpuField();
+				for (int i = 0; i < 10; i++) {
+					for (int j = 0; j < 10; j++) {
+						cpu[i][j].setShowStatus(cpu[i][j].trueStatus);
+					}
+				}
+			}else {
+				Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				alert.setHeaderText(null);
+				alert.setContentText("Not enough ships on the field!");
+				alert.showAndWait();
+			}
+		});
+		root.add(startButton, 7, 11, 2, 1);
+
+		mainStage.show();
+	}
+
+	private void clearUserField(){
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				user[i][j].setShowStatus(StatusEnum.clear);
+			}
+		}
+		addShipHandler.setLength(0);
+		addShipHandler.setCount(new Label("0"));
+		for (int i = 0; i < 4; i++) {
+			addShipCount[i].setText(Integer.toString(4 - i));
+		}
+		userShips = 0;
+	}
+	private void prepareWindow(Stage mainStage){
+		root = new GridPane();
+		this.mainStage = mainStage;
 		mainScene = new Scene(root, 630, 500);
 		mainStage.setScene(mainScene);
 		mainStage.setResizable(false);
@@ -42,12 +94,14 @@ public class Main extends Application{
 			root.getRowConstraints().add(row);
 		}
 
-		Label label = new Label("sd");
+
+	}
+	private void createFields(){
 		orientation = new Button("H");
 		user = new FieldCell[10][10];
 		cpu = new FieldCell[10][10];
-		addShipHandler = new UserAddShipHandler<>(user, orientation);
-		root.add(label, 10, 1);
+		addShipHandler = new UserAddShipHandler<>(this);
+
 
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
@@ -58,7 +112,8 @@ public class Main extends Application{
 				root.add(cpu[i][j], j + 11, i);
 			}
 		}
-
+	}
+	private void createAddButtons(){
 		addShip = new FieldCell[4];
 		addShipCount = new Label[4];
 		for (int i = 0; i < 4; i++) {
@@ -85,7 +140,93 @@ public class Main extends Application{
 		});
 		root.add(orientation, 3, 12);
 
-		mainStage.show();
+		clearField = new Button("Clear");
+		clearField.setOnAction(event -> {
+			clearUserField();
+		});
+		root.add(clearField, 5 , 11, 2, 1);
+	}
+	private void fillCpuField(){
+		Integer orientation;
+
+		boolean flag;
+
+		for (int i = 4; i >= 2 ; i--) {
+			for (int j = 0; j < 4 - i + 1; j++) {
+				if (i == 2 && j == 2)
+					continue;
+				do {
+					orientation = (int) (Math.random() * 2.0);
+					Integer side = (int) (Math.random() * 2.0);
+					int pos = (int)(Math.random() *(11.0 - i));
+					int x = pos * orientation + 9 * side * Math.abs(orientation - 1);
+					int y = pos * Math.abs(orientation - 1) + 9 * side * orientation;
+					flag = trySet(x, y, orientation, i );
+					if (!flag)
+						continue;
+					place(x, y, orientation, i);
+				}while (!flag);
+			}
+
+		}
+
+	}
+	private void place(int x, int y,int orientation, int length){
+		switch (orientation){
+			case 0:
+				for (int i = 0; i <length ; i++) {
+					cpu[x][y + i].trueStatus = StatusEnum.unbroken;
+				}
+				break;
+			case 1:
+				for (int i = 0; i < length; i++) {
+					cpu[x + i][y].trueStatus = StatusEnum.unbroken;
+				}
+				break;
+		}
+	}
+	private Boolean trySet(Integer x, Integer y, Integer orientation, Integer length){
+		switch (orientation){
+			case 0:
+				if (y + length > 10)
+					return Boolean.FALSE;
+				for (int i = 0; i <length ; i++) {
+					if( !checkField(x, y + i))
+						return Boolean.FALSE;
+				}
+				break;
+			case 1:
+				if (x + length > 10)
+					return Boolean.FALSE;
+				for (int i = 0; i < length; i++) {
+					if(!checkField(x + i, y)){
+						return Boolean.FALSE;
+					}
+				}
+				break;
+		}
+		return Boolean.TRUE;
+	}
+	private Boolean checkField(int x, int y){
+		Boolean result = Boolean.TRUE;
+		if (x > 0)
+			result = !cpu[x - 1][y].trueStatus.equals(StatusEnum.unbroken);
+		if (y > 0)
+			result = !cpu[x][y - 1].trueStatus.equals(StatusEnum.unbroken) && result;
+		if (x < 9)
+			result = !cpu[x + 1][y].trueStatus.equals(StatusEnum.unbroken) && result;
+		if (y < 9)
+			result = !cpu[x][y + 1].trueStatus.equals(StatusEnum.unbroken) && result;
+		if (x > 0 && y > 0)
+			result = !cpu[x - 1][y - 1].trueStatus.equals(StatusEnum.unbroken) && result;
+		if (x > 0 && y < 9)
+			result = !cpu[x - 1][y + 1].trueStatus.equals(StatusEnum.unbroken) && result;
+		if (x < 9 && y < 9)
+			result = !cpu[x + 1][y + 1].trueStatus.equals(StatusEnum.unbroken) && result;
+		if (x < 9 && y > 0)
+			result = !cpu[x + 1][y - 1].trueStatus.equals(StatusEnum.unbroken) && result;
+		result = !cpu[x][y].trueStatus.equals(StatusEnum.missed) && result;
+		return result;
 	}
 }
 

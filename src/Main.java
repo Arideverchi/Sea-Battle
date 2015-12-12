@@ -3,9 +3,7 @@ import javafx.event.ActionEvent;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import java.util.Arrays;
@@ -89,7 +87,7 @@ public class Main extends Application{
 		root = new GridPane();
 		this.mainStage = mainStage;
 		mainScene = new Scene(root, 630, 450);
-		mainStage.setScene(mainScene);
+
 		mainStage.setResizable(false);
 		//root.setGridLinesVisible(true);
 		ColumnConstraints column = new ColumnConstraints(30);
@@ -102,9 +100,17 @@ public class Main extends Application{
 		for (int i = 0; i < 20; i++) {
 			root.getRowConstraints().add(row);
 		}
-
+		//createMenus();
 		userShips = 0;
 		cpuShips = 0;
+		mainStage.setScene(mainScene);
+	}
+
+	private void createMenus(){
+		Menu help = new Menu("Help");
+		MenuBar menuBar = new MenuBar();
+		menuBar.getMenus().addAll(help);
+		((GridPane) mainScene.getRoot()).getChildren().addAll(menuBar);
 	}
 	private void createFields(){
 		orientation = new Button("H");
@@ -128,6 +134,7 @@ public class Main extends Application{
 		addShipCount = new Label[4];
 		for (int i = 0; i < 4; i++) {
 			addShip[i] = new FieldCell(Status.unbroken, Integer.toString(i + 1));
+			addShip[i].setPrefSize(25, 25);
 			addShipCount[i] = new Label(Integer.toString(4 - i));
 			Integer fi = i;
 			addShip[i].setOnAction(event -> {
@@ -185,8 +192,8 @@ public class Main extends Application{
 
 		for (int i = 0; i < 4; i++) {
 			do {
-				int x = (int) (Math.random() * 8.0) + 1;
-				int y = (int) (Math.random() * 8.0) + 1;
+				int x = (int) (Math.random() * 9.0);
+				int y = (int) (Math.random() * 9.0);
 				flag = trySet(x, y, 0, 2);
 				if (!flag)
 					continue;

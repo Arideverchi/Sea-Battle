@@ -94,6 +94,10 @@ public class FireHandler<T extends Event> implements EventHandler {
 	}
 
 	private void deny(){
+		int bottom;
+		int top;
+		int right;
+		int left;
 		int r[][] = generateRMatrix();
 		int pos[] = InjuredLengthAndOrientation(lastHit.x, lastHit.y);
 		Point target = new Point(-1, -1);
@@ -112,8 +116,6 @@ public class FireHandler<T extends Event> implements EventHandler {
 		}else {
 			switch (pos[1]){
 				case 0:
-					int right;
-					int left;
 					int x = lastHit.x;
 					right = left = lastHit.y;
 					while (left >= 0 && user[x][left].getShowStatus().equals(Status.injured)){
@@ -134,8 +136,7 @@ public class FireHandler<T extends Event> implements EventHandler {
 					}
 					break;
 				case 1:
-					int bottom;
-					int top;
+
 					int y = lastHit.y;
 					bottom = top = lastHit.x;
 					while (top >= 0 && user[top][y].getShowStatus().equals(Status.injured)){
@@ -146,7 +147,7 @@ public class FireHandler<T extends Event> implements EventHandler {
 					}
 					max = 0;
 
-					if (isInField(top, y) && r[y][top] > max){
+					if (isInField(top, y) && r[top][y] > max){// FIXME: 12.12.2015 wrong parameters
 						max = r[top][y];
 						target = new Point(top, y);
 					}
@@ -194,31 +195,38 @@ public class FireHandler<T extends Event> implements EventHandler {
 	}
 
 	private Status fire(int x, int y){
-		switch (user[x][y].getShowStatus()){
-			case clear:
-				user[x][y].setShowStatus(Status.missed);
-				return Status.missed;
-			case unbroken:
-				user[x][y].setShowStatus(Status.injured);
-				if (checkKilled(x, y, user)){
-					userShips[killShip(x, y, user) - 1]--;
-					countUserShips--;
-					if (countUserShips == 0){
-						showResult("I won!");
-						return Status.clear;
+		System.out.println(x + " " + y);
+		try {
+			switch (user[x][y].getShowStatus()) {
+
+				case clear:
+					user[x][y].setShowStatus(Status.missed);
+					return Status.missed;
+				case unbroken:
+					user[x][y].setShowStatus(Status.injured);
+					if (checkKilled(x, y, user)) {
+						userShips[killShip(x, y, user) - 1]--;
+						countUserShips--;
+						if (countUserShips == 0) {
+							showResult("I won!");
+							return Status.clear;
+						}
+						//System.out.println(userShips);
+						mode = Mode.reconnaissance;
+						return Status.killed;
+					} else {
+						mode = Mode.denying;
+						lastHit.x = x;
+						lastHit.y = y;
+						return Status.injured;
 					}
-					//System.out.println(userShips);
-					mode = Mode.reconnaissance;
-					return Status.killed;
-				}else {
-					mode = Mode.denying;
-					lastHit.x = x;
-					lastHit.y = y;
-					return Status.injured;
-				}
+			}
+
+			System.out.println("if you see this message you have a bug");
+			return Status.clear;// carefully it might cause a bug
+		}catch (Exception e){
+			throw  e;
 		}
-		System.out.println("if you see this message you have a bug");
-		return Status.clear;// carefully it might cause a bug
 	}
 
 	private Point calculateSearch(){
@@ -262,7 +270,7 @@ public class FireHandler<T extends Event> implements EventHandler {
 			for (int j = 0; j < 10; j++) {
 				//System.out.printf("%3d", r[i][j]);
 			}
-			System.out.println();
+			//System.out.println();
 		}
 		return r;
 	}

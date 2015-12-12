@@ -1,6 +1,5 @@
 import javafx.application.Application;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
@@ -9,7 +8,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
-
 import java.util.Arrays;
 
 /**
@@ -19,7 +17,6 @@ public class Main extends Application{
 	public static void main(String[] args) {
 		launch(args);
 	}
-
 	FieldCell [][]user;
 	FieldCell [][]cpu;
 	Scene mainScene;
@@ -40,10 +37,9 @@ public class Main extends Application{
 		createFields();
 		createAddButtons();
 
-
 		startButton = new Button("Start");
 		startButton.setOnAction(event -> {
-			if(userShips.equals(10)){
+			if(userShips == 10){// TODO: 11.12.2015 fix this
 				root.getChildren().removeAll(orientation, clearField, startButton);
 				root.getChildren().removeAll(Arrays.asList(addShip));
 				root.getChildren().removeAll(Arrays.asList(addShipCount));
@@ -51,7 +47,7 @@ public class Main extends Application{
 				FireHandler<ActionEvent> fireHandler = new FireHandler<>(user, cpu, mainStage, this);
 				for (int i = 0; i < 10; i++) {
 					for (int j = 0; j < 10; j++) {
-						cpu[i][j].setShowStatus(cpu[i][j].trueStatus);// TODO: 10.12.2015 hide this in the end
+						//cpu[i][j].setShowStatus(cpu[i][j].trueStatus);// TODO: 10.12.2015 hide this in the end
 						cpu[i][j].setOnAction(fireHandler);
 					}
 				}
@@ -92,10 +88,10 @@ public class Main extends Application{
 
 		root = new GridPane();
 		this.mainStage = mainStage;
-		mainScene = new Scene(root, 630, 500);
+		mainScene = new Scene(root, 630, 450);
 		mainStage.setScene(mainScene);
 		mainStage.setResizable(false);
-		root.setGridLinesVisible(true);
+		//root.setGridLinesVisible(true);
 		ColumnConstraints column = new ColumnConstraints(30);
 		column.setHalignment(HPos.CENTER);
 		RowConstraints row = new RowConstraints(30);
@@ -109,7 +105,6 @@ public class Main extends Application{
 
 		userShips = 0;
 		cpuShips = 0;
-
 	}
 	private void createFields(){
 		orientation = new Button("H");
@@ -160,10 +155,7 @@ public class Main extends Application{
 		root.add(clearField, 5 , 11, 2, 1);
 	}
 	private void fillCpuField(){
-
-
 		boolean flag;
-
 		for (int i = 4; i >= 2 ; i--) {
 			for (int j = 0; j < 4 - i + 1; j++) {
 				if (i == 2 && j == 2)
@@ -261,4 +253,3 @@ public class Main extends Application{
 		return result;
 	}
 }
-

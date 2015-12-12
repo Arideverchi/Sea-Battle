@@ -208,6 +208,11 @@ public class FireHandler<T extends Event> implements EventHandler {
 						userShips[killShip(x, y, user) - 1]--;
 						countUserShips--;
 						if (countUserShips == 0) {
+							for (int i = 0; i < 10; i++) {
+								for (int j = 0; j < 10; j++) {
+									cpu[i][j].setShowStatus(cpu[i][j].trueStatus);
+								}
+							}
 							showResult("I won!");
 							return Status.clear;
 						}

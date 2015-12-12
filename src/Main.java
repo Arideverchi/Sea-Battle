@@ -1,9 +1,15 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import java.util.Arrays;
@@ -19,7 +25,10 @@ public class Main extends Application{
 	FieldCell [][]cpu;
 	Scene mainScene;
 	Stage mainStage;
-	GridPane root;
+	private GridPane root;
+	private ToolBar toolBar;
+	Button help;
+	Button about;
 	Button startButton;
 	Integer userShips = 0, cpuShips = 0;
 
@@ -31,6 +40,8 @@ public class Main extends Application{
 
 
 	public void start(Stage mainStage){
+
+
 		prepareWindow(mainStage);
 		createFields();
 		createAddButtons();
@@ -56,14 +67,14 @@ public class Main extends Application{
 				alert.showAndWait();
 			}
 		});
-		root.add(startButton, 7, 11, 2, 1);
+		root.add(startButton, 7, 12, 2, 1);
 
-		Button restart = new Button("restart");
+		Button restart = new Button("Restart");
 		restart.setOnAction(event -> {
 			mainStage.close();
 			start(mainStage);
 		});
-		root.add(restart, 9, 11, 2 ,1);
+		root.add(restart, 9, 12, 2 ,1);
 
 		mainStage.show();
 	}
@@ -83,10 +94,9 @@ public class Main extends Application{
 	}
 	private void prepareWindow(Stage mainStage){
 		mainStage.setTitle("Sea Battle");
-
 		root = new GridPane();
 		this.mainStage = mainStage;
-		mainScene = new Scene(root, 630, 450);
+		mainScene = new Scene(root, 630, 480);
 
 		mainStage.setResizable(false);
 		//root.setGridLinesVisible(true);
@@ -100,17 +110,42 @@ public class Main extends Application{
 		for (int i = 0; i < 20; i++) {
 			root.getRowConstraints().add(row);
 		}
-		//createMenus();
+		createMenus();
 		userShips = 0;
 		cpuShips = 0;
 		mainStage.setScene(mainScene);
 	}
 
 	private void createMenus(){
-		Menu help = new Menu("Help");
-		MenuBar menuBar = new MenuBar();
-		menuBar.getMenus().addAll(help);
-		((GridPane) mainScene.getRoot()).getChildren().addAll(menuBar);
+		help = new Button("Help");
+		EventHandler<ActionEvent> helpHandler = new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				Alert message = new Alert(Alert.AlertType.INFORMATION);
+				message.setTitle("Help");
+				message.setHeaderText(null);
+				message.setContentText("Press green button with digit to place the ship. Number on the button indicates length of the ship. " +
+						"Number near the button indicates amount of ships of this length.\n" +
+						"To change orientation press the button. V  means vertical orientation, H means horizontal orientation.\n" +
+						"Press Clear to clear your field.\n" +
+						"Press Start to start the game.\n" +
+						"Press Restart to start new game.");
+				message.showAndWait();
+			}
+		};
+
+		help.setOnAction(helpHandler);
+		about = new Button("About");
+		about.setOnAction(event -> {
+			Alert message = new Alert(Alert.AlertType.INFORMATION);
+			message.setTitle("About");
+			message.setHeaderText(null);
+			message.setContentText("Developed by Alexander Karpovich BrSu 2015");
+			message.showAndWait();
+		});
+		toolBar = new ToolBar(help, about);
+		toolBar.prefWidthProperty().bind(mainStage.widthProperty());
+		((GridPane) mainScene.getRoot()).add(toolBar, 0, 0, 21, 1);
 	}
 	private void createFields(){
 		orientation = new Button("H");
@@ -124,8 +159,8 @@ public class Main extends Application{
 				user[i][j] = new FieldCell(i, j);
 				user[i][j].setOnAction(addShipHandler);
 				cpu[i][j] = new FieldCell(i, j);
-				root.add(user[i][j], j, i);
-				root.add(cpu[i][j], j + 11, i);
+				root.add(user[i][j], j, i + 1);
+				root.add(cpu[i][j], j + 11, i + 1);
 			}
 		}
 	}
@@ -142,8 +177,8 @@ public class Main extends Application{
 				addShipHandler.setLength(Integer.parseInt(button.getText()));
 				addShipHandler.setCount(addShipCount[fi]);
 			});
-			root.add(addShip[i], 1, 11 + i);
-			root.add(addShipCount[i], 2, 11 + i);
+			root.add(addShip[i], 1, 12 + i);
+			root.add(addShipCount[i], 2, 12 + i);
 		}
 
 		orientation.setPrefSize(30, 30);
@@ -159,7 +194,7 @@ public class Main extends Application{
 
 		clearField = new Button("Clear");
 		clearField.setOnAction(event -> Main.this.clearUserField());
-		root.add(clearField, 5 , 11, 2, 1);
+		root.add(clearField, 5 , 12, 2, 1);
 	}
 	private void fillCpuField(){
 		boolean flag;
@@ -259,4 +294,5 @@ public class Main extends Application{
 		result = !cpu[x][y].trueStatus.equals(Status.missed) && result;
 		return result;
 	}
+
 }

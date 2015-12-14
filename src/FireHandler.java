@@ -37,12 +37,11 @@ public class FireHandler<T extends Event> implements EventHandler {
 		switch (cell.trueStatus){
 			case clear:
 				cell.setShowStatus(Status.missed);
-				cell.setDisable(true);//// TODO: 10.12.2015 add cpu shooting
+				cell.setDisable(true);
 				makeAMove();
 				break;
 			case unbroken:
 				cell.setShowStatus(Status.injured);
-				cell.setDisable(true);
 				if (checkKilled(cell.x, cell.y, cpu)){
 					countCpuShips--;
 					killShip(cell.x, cell.y, cpu);
@@ -195,7 +194,7 @@ public class FireHandler<T extends Event> implements EventHandler {
 	}
 
 	private Status fire(int x, int y){
-		System.out.println(x + " " + y);
+		//System.out.println(x + " " + y);
 		try {
 			switch (user[x][y].getShowStatus()) {
 

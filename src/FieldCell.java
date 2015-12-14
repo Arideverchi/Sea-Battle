@@ -35,13 +35,13 @@ class FieldCell extends Button {
 	private void setStatusStyle(Status status){
 		switch (status){
 			case injured:
-				setStyle("-fx-background-color: red;" +
+				setStyle("-fx-background-color: #ff0000;" +
 						"-fx-border-width: 1px;" +
 						"-fx-border-color: black;");
-				setDisable(true);
+				setOnAction(null);
 				break;
 			case missed:
-				setStyle("-fx-background-color: rgba(65, 64, 68, 0.91);" +
+				setStyle("-fx-background-color: gray;" +
 						"-fx-border-width: 1px;" +
 						"-fx-border-color: black;");
 				setDisable(true);
@@ -55,6 +55,12 @@ class FieldCell extends Button {
 				setStyle("-fx-background-color: #0be4ff;" +
 						"-fx-border-width: 1px;" +
 						"-fx-border-color: black;");
+				break;
+			case killed:
+				setStyle("-fx-background-color: #ff0000;" +
+						"-fx-border-width: 1px;" +
+						"-fx-border-color: black;");
+				setOnAction(null);
 		}
 	}
 

@@ -140,7 +140,7 @@ public class Main extends Application{
 			Alert message = new Alert(Alert.AlertType.INFORMATION);
 			message.setTitle("About");
 			message.setHeaderText(null);
-			message.setContentText("Developed by Alexander Karpovich BrSu 2015");
+			message.setContentText("Developed by Alexander Karpovich BrSU 2015");
 			message.showAndWait();
 		});
 		toolBar = new ToolBar(help, about);
@@ -275,24 +275,17 @@ public class Main extends Application{
 	}
 	private Boolean checkField(int x, int y){
 		Boolean result = Boolean.TRUE;
-		if (x > 0)
-			result = !cpu[x - 1][y].trueStatus.equals(Status.unbroken);
-		if (y > 0)
-			result = !cpu[x][y - 1].trueStatus.equals(Status.unbroken) && result;
-		if (x < 9)
-			result = !cpu[x + 1][y].trueStatus.equals(Status.unbroken) && result;
-		if (y < 9)
-			result = !cpu[x][y + 1].trueStatus.equals(Status.unbroken) && result;
-		if (x > 0 && y > 0)
-			result = !cpu[x - 1][y - 1].trueStatus.equals(Status.unbroken) && result;
-		if (x > 0 && y < 9)
-			result = !cpu[x - 1][y + 1].trueStatus.equals(Status.unbroken) && result;
-		if (x < 9 && y < 9)
-			result = !cpu[x + 1][y + 1].trueStatus.equals(Status.unbroken) && result;
-		if (x < 9 && y > 0)
-			result = !cpu[x + 1][y - 1].trueStatus.equals(Status.unbroken) && result;
-		result = !cpu[x][y].trueStatus.equals(Status.missed) && result;
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1 ; j++) {
+				if ((i != 0 || j != 0) && isInField(x + i, y + j)){
+					result = !cpu[x + i][y + j].trueStatus.equals(Status.unbroken) && result;
+				}
+			}
+		}
+
 		return result;
 	}
-
+	private boolean isInField(int x, int y){
+		return (x < 10 && x >= 0 && y < 10 && y >= 0);
+	}
 }

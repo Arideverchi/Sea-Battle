@@ -1,88 +1,64 @@
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.scene.control.Label;
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
+import javafx.scene.control.Label
 
-class UserAddShipHandler<T extends Event> implements EventHandler {
-	Integer length;
-	Label count;
-	Main main;
+internal class UserAddShipHandler(private var main: Main) : EventHandler<ActionEvent> {
+    var length: Int = 0
+    var count: Label = Label("0")
+    override fun handle(event: ActionEvent) {
+        val button = event.source as FieldCell
+        if (!trySet(button.x, button.y) || count.text == "0") return
+        for (i in 0 until length) {
+            if (main.orientation.text == "H") {
+                main.user!![button.x][button.y + i].showStatus = (Status.unbroken)
+            } else {
+                main.user!![button.x + i][button.y].showStatus = Status.unbroken
+            }
+        }
+        val k = Integer.parseInt(count.text) - 1
+        count.text = k.toString()
+        main.userShips++
+    }
 
-	public void setLength(Integer length) {
-		this.length = length;
-	}
+    private fun trySet(x: Int, y: Int): Boolean {
+        return if (main.orientation.text == "H") {
+            trySetHorizontal(x, y)
+        } else trySetVertical(x, y)
+    }
 
-	public void setCount(Label count) {
-		this.count = count;
-	}
+    private fun trySetHorizontal(x: Int, y: Int): Boolean {
+        if (y + length > 10) return false
+        for (i in 0 until length) {
+            if (!checkFieldRange(x, y + i)) {
+                return false
+            }
+        }
+        return true
+    }
 
-	UserAddShipHandler(Main main){
-		this.main = main;
-		this.length = 0;
-		this.count = new Label("0");
-	}
-	@Override
-	public void handle(Event event) {
-		FieldCell button = ((FieldCell) event.getSource());
-		if (!trySet(button.x, button.y) || count.getText().equals("0"))
-			return;
-		for (int i = 0; i < length; i++) {
-			if(main.orientation.getText().equals("H")){
-				main.user[button.x][button.y + i].setShowStatus(Status.unbroken);
-			}else {
-				main.user[button.x + i][button.y].setShowStatus(Status.unbroken);
-			}
-		}
-		Integer k = Integer.parseInt( count.getText()) - 1;
-		count.setText(k.toString());
-		main.userShips++;
-	}
+    private fun trySetVertical(x: Int, y: Int): Boolean {
+        if (x + length > 10) return false
+        for (i in 0 until length) {
+            if (!checkFieldRange(x + i, y)) {
+                return false
+            }
+        }
+        return true
+    }
 
-	private Boolean trySet(int x, int y){
-		if (main.orientation.getText().equals("H")){
-			return trySetHorizontal(x, y);
-		}
-		return trySetVertical(x, y);
-	}
+    private fun checkFieldRange(x: Int, y: Int): Boolean {
+        for(i in -1..1) {
+            for(j in -1..1) {
+                if (!checkField(x + i, y + j)) return false
+            }
+        }
+        return true
+    }
 
-	private Boolean trySetHorizontal(int x, int y){
-		if (y + length > 10)
-			return Boolean.FALSE;
-		for (int i = 0; i < length; i++) {
-			if (!checkField(x, y + i)) {
-				return Boolean.FALSE;
-			}
-		}
-		return Boolean.TRUE;
-	}
-	private Boolean trySetVertical(int x, int y){
-		if (x + length > 10)
-			return Boolean.FALSE;
-		for (int i = 0; i < length; i++) {
-			if (!checkField(x + i, y)) {
-				return Boolean.FALSE;
-			}
-		}
-		return Boolean.TRUE;
-	}
-
-	private Boolean checkField(int x, int y){
-		Boolean result = Boolean.TRUE;
-		if (x > 0)
-			result = !main.user[x - 1][y].getShowStatus().equals(Status.unbroken);
-		if (y > 0)
-			result = !main.user[x][y - 1].getShowStatus().equals(Status.unbroken) && result;
-		if (x < 9)
-			result = !main.user[x + 1][y].getShowStatus().equals(Status.unbroken) && result;
-		if (y < 9)
-			result = !main.user[x][y + 1].getShowStatus().equals(Status.unbroken) && result;
-		if (x > 0 && y > 0)
-			result = !main.user[x - 1][y - 1].getShowStatus().equals(Status.unbroken) && result;
-		if (x > 0 && y < 9)
-			result = !main.user[x - 1][y + 1].getShowStatus().equals(Status.unbroken) && result;
-		if (x < 9 && y < 9)
-			result = !main.user[x + 1][y + 1].getShowStatus().equals(Status.unbroken) && result;
-		if (x < 9 && y > 0)
-			result = !main.user[x + 1][y - 1].getShowStatus().equals(Status.unbroken) && result;
-		return result;
-	}
+    private fun checkField(x: Int, y: Int): Boolean {
+        if (x !in 0..9 || y !in 0..9) {
+            return true
+        }
+        return main.user!![x][y].showStatus != Status.unbroken
+    }
 }

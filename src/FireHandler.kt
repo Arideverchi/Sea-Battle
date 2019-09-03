@@ -8,7 +8,9 @@ import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 
-class FireHandler internal constructor(private var user: Array<Array<FieldCell>>, private var cpu: Array<Array<FieldCell>>, private var stage: Stage, private var main: Main) : EventHandler<ActionEvent> {
+class FireHandler internal constructor(private var user: Array<Array<FieldCell>>,
+                                       private var cpu: Array<Array<FieldCell>>,
+                                       private var stage: Stage, private var main: Main) : EventHandler<ActionEvent> {
     private var countUserShips: Int = 10
     private var userShips: IntArray = intArrayOf(4, 3, 2, 1)
     private var countCpuShips: Int = 10

@@ -28,6 +28,7 @@ class Main : Application() {
     private lateinit var help: Button
     private lateinit var about: Button
     private lateinit var startButton: Button
+    private lateinit var fillRandomButton: Button
     internal var userShips: Int = 0
     private var cpuShips: Int = 0
     private lateinit var addShip: Array<FieldCell>
@@ -43,7 +44,7 @@ class Main : Application() {
         startButton.onAction = EventHandler {
             if (userShips == 10) {// TODO: 11.12.2015 fix this
 
-                root.children.removeAll(orientation, clearField, startButton)
+                root.children.removeAll(orientation, clearField, startButton, fillRandomButton)
                 root.children.removeAll(addShip.toList())
                 root.children.removeAll(addShipCount.toList())
                 fillCpuField()
@@ -67,6 +68,16 @@ class Main : Application() {
             start(mainStage)
         }
         root.add(restart, 9, 12, 3, 1)
+        fillRandomButton = Button("Random")
+        fillRandomButton.onAction = EventHandler {
+            if (userShips != 0) clearField.fire()
+            while (userShips < 10) {
+                if (Math.random() >= 0.5) orientation.fire()
+                addShip[(Math.random() * addShip.size).toInt()].fire()
+                user[(Math.random() * 10).toInt()][(Math.random() * 10).toInt()].fire()
+            }
+        }
+        root.add(fillRandomButton, 5, 13, 3, 1)
         mainStage.show()
     }
 
@@ -168,7 +179,7 @@ class Main : Application() {
             addShip[i].onAction = EventHandler { event: ActionEvent? ->
                 val button: Button? = event!!.source as Button?
                 addShipHandler.length = (Integer.parseInt(button!!.text))
-                addShipHandler.count = (addShipCount[(fi)])
+                addShipHandler.count = addShipCount[fi]
             }
             root.add(addShip[i], 1, 12 + i)
             root.add(addShipCount[i], 2, 12 + i)
@@ -185,7 +196,7 @@ class Main : Application() {
         }
         root.add(orientation, 3, 12)
         clearField = Button("Clear")
-        clearField.onAction = EventHandler { event: ActionEvent? -> clearUserField() }
+        clearField.onAction = EventHandler { clearUserField() }
         root.add(clearField, 5, 12, 2, 1)
     }
 
@@ -200,7 +211,7 @@ class Main : Application() {
                     val pos = (Math.random() * (11.0 - i)).toInt()
                     val x = pos * orientation + 9 * side * abs(orientation - 1)
                     val y = pos * abs(orientation - 1) + 9 * side * orientation
-                    flag = (trySet(x, y, orientation, i))
+                    flag = trySet(x, y, orientation, i)
                     if (!flag) continue
                     place(x, y, orientation, i)
                 } while (!flag)

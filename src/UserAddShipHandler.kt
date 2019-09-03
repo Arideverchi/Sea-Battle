@@ -10,9 +10,9 @@ internal class UserAddShipHandler(private var main: Main) : EventHandler<ActionE
         if (!trySet(button.x, button.y) || count.text == "0") return
         for (i in 0 until length) {
             if (main.orientation.text == "H") {
-                main.user!![button.x][button.y + i].showStatus = (Status.unbroken)
+                main.user[button.x][button.y + i].showStatus = (Status.unbroken)
             } else {
-                main.user!![button.x + i][button.y].showStatus = Status.unbroken
+                main.user[button.x + i][button.y].showStatus = Status.unbroken
             }
         }
         val k = Integer.parseInt(count.text) - 1
@@ -59,6 +59,6 @@ internal class UserAddShipHandler(private var main: Main) : EventHandler<ActionE
         if (x !in 0..9 || y !in 0..9) {
             return true
         }
-        return main.user!![x][y].showStatus != Status.unbroken
+        return main.user[x][y].showStatus != Status.unbroken
     }
 }

@@ -19,10 +19,10 @@ import kotlin.math.abs
  * The Great Sea Battle app
  */
 class Main : Application() {
-    internal var user: Array<Array<FieldCell>>? = null
-    private var cpu: Array<Array<FieldCell>>? = null
-    private var mainScene: Scene? = null
-    private var mainStage: Stage? = null
+    internal lateinit var user: Array<Array<FieldCell>>
+    private lateinit var cpu: Array<Array<FieldCell>>
+    private lateinit var mainScene: Scene
+    private lateinit var mainStage: Stage
     private lateinit var root: GridPane
     private var toolBar: ToolBar? = null
     private lateinit var help: Button
@@ -34,7 +34,7 @@ class Main : Application() {
     private lateinit var addShipCount: Array<Label>
     internal lateinit var orientation: Button
     private lateinit var clearField: Button
-    private var addShipHandler: UserAddShipHandler? = null
+    private lateinit var addShipHandler: UserAddShipHandler
     override fun start(mainStage: Stage) {
         prepareWindow(mainStage)
         createFields()
@@ -47,17 +47,15 @@ class Main : Application() {
                 root.children.removeAll(addShip.toList())
                 root.children.removeAll(addShipCount.toList())
                 fillCpuField()
-                val fireHandler = FireHandler(user!!, cpu!!, mainStage, this)
+                val fireHandler = FireHandler(user, cpu, mainStage, this)
                 for (i in 0..9) {
                     for (j in 0..9) {
-                        //cpu[i][j].setShowStatus(cpu[i][j].trueStatus);// TODO: 10.12.2015 hide this in the end
-
-                        cpu!![i][j].onAction = fireHandler
+                        cpu[i][j].onAction = fireHandler
                     }
                 }
             } else {
-                val alert: Alert? = Alert(AlertType.INFORMATION)
-                alert!!.headerText = null
+                val alert = Alert(AlertType.INFORMATION)
+                alert.headerText = null
                 alert.contentText = "Not enough ships on the field!"
                 alert.showAndWait()
             }
@@ -75,11 +73,11 @@ class Main : Application() {
     private fun clearUserField() {
         for (i in 0..9) {
             for (j in 0..9) {
-                user!![i][j].showStatus = Status.clear
+                user[i][j].showStatus = Status.clear
             }
         }
-        addShipHandler!!.length = 0
-        addShipHandler!!.count = Label("0")
+        addShipHandler.length = 0
+        addShipHandler.count = Label("0")
         for (i in 0..3) {
             addShipCount[i].text = (4 - i).toString()
         }
@@ -135,22 +133,26 @@ class Main : Application() {
             message.showAndWait()
         }
         toolBar = ToolBar(help, about)
-        toolBar!!.prefWidthProperty().bind(mainStage!!.widthProperty())
-        (mainScene!!.root as GridPane).add(toolBar, 0, 0, 21, 1)
+        toolBar!!.prefWidthProperty().bind(mainStage.widthProperty())
+        (mainScene.root as GridPane).add(toolBar, 0, 0, 21, 1)
     }
 
     private fun createFields() {
         orientation = Button("H")
-        user = Array(10) { i -> Array(10) { j -> FieldCell(i, j) } }
-        cpu = Array(10) { i -> Array(10) { j -> FieldCell(i, j) } }
         addShipHandler = UserAddShipHandler(this)
-        for (i in 0..9) {
-            for (j in 0..9) {
-                user!![i][j] = FieldCell(i, j)
-                user!![i][j].onAction = addShipHandler
-                cpu!![i][j] = FieldCell(i, j)
-                root.add(user!![i][j], j, i + 1)
-                root.add(cpu!![i][j], j + 11, i + 1)
+        user = Array(10) { i ->
+            Array(10) { j ->
+                val result = FieldCell(i, j)
+                result.onAction = addShipHandler
+                root.add(result, j, i + 1)
+                result
+            }
+        }
+        cpu = Array(10) { i ->
+            Array(10) { j ->
+                val result = FieldCell(i, j)
+                root.add(result, j + 11, i + 1)
+                result
             }
         }
     }
@@ -165,8 +167,8 @@ class Main : Application() {
             val fi: Int = i
             addShip[i].onAction = EventHandler { event: ActionEvent? ->
                 val button: Button? = event!!.source as Button?
-                addShipHandler!!.length = (Integer.parseInt(button!!.text))
-                addShipHandler!!.count = (addShipCount[(fi)])
+                addShipHandler.length = (Integer.parseInt(button!!.text))
+                addShipHandler.count = (addShipCount[(fi)])
             }
             root.add(addShip[i], 1, 12 + i)
             root.add(addShipCount[i], 2, 12 + i)
@@ -198,7 +200,7 @@ class Main : Application() {
                     val pos = (Math.random() * (11.0 - i)).toInt()
                     val x = pos * orientation + 9 * side * abs(orientation - 1)
                     val y = pos * abs(orientation - 1) + 9 * side * orientation
-                    flag = (trySet(x, y, orientation, i))!!
+                    flag = (trySet(x, y, orientation, i))
                     if (!flag) continue
                     place(x, y, orientation, i)
                 } while (!flag)
@@ -208,7 +210,7 @@ class Main : Application() {
             val orientation = (Math.random() * 2.0).toInt()
             val x = (Math.random() * 8.0).toInt() + 1
             val y = (Math.random() * 8.0).toInt() + 1
-            flag = (trySet(x, y, orientation, 2))!!
+            flag = (trySet(x, y, orientation, 2))
             if (!flag) continue
             place(x, y, orientation, 2)
         } while (!flag)
@@ -216,7 +218,7 @@ class Main : Application() {
             do {
                 val x = (Math.random() * 9.0).toInt()
                 val y = (Math.random() * 9.0).toInt()
-                flag = (trySet(x, y, 0, 2))!!
+                flag = trySet(x, y, 0, 2)
                 if (!flag) continue
                 place(x, y, 0, 1)
             } while (!flag)
@@ -227,37 +229,33 @@ class Main : Application() {
     private fun place(x: Int, y: Int, orientation: Int, length: Int) {
         when (orientation) {
             0 -> {
-                var i = 0
-                while (i < length) {
-                    cpu!![x][y + i].trueStatus = Status.unbroken
-                    i++
+                for (i in 0 until length) {
+                    cpu[x][y + i].trueStatus = Status.unbroken
                 }
             }
             1 -> {
-                var i = 0
-                while (i < length) {
-                    cpu!![x + i][y].trueStatus = Status.unbroken
-                    i++
+                for (i in 0 until length) {
+                    cpu[x + i][y].trueStatus = Status.unbroken
                 }
             }
         }
     }
 
-    private fun trySet(x: Int?, y: Int?, orientation: Int?, length: Int?): Boolean? {
+    private fun trySet(x: Int, y: Int, orientation: Int, length: Int): Boolean {
         when (orientation) {
             0 -> {
-                if (y!! + (length)!! > 10) return false
+                if (y + (length) > 10) return false
                 var i = 0
                 while (i < (length)) {
-                    if (!checkField((x)!!, y + i)!!) return false
+                    if (!checkField(x, y + i)) return false
                     i++
                 }
             }
             1 -> {
-                if (x!! + (length)!! > 10) return false
+                if (x + (length) > 10) return false
                 var i = 0
                 while (i < (length)) {
-                    if (!checkField(x + i, (y)!!)!!) {
+                    if (!checkField(x + i, y)) {
                         return false
                     }
                     i++
@@ -267,20 +265,16 @@ class Main : Application() {
         return true
     }
 
-    private fun checkField(x: Int, y: Int): Boolean? {
+    private fun checkField(x: Int, y: Int): Boolean {
         var result = true
         for (i in -1..1) {
             for (j in -1..1) {
                 if ((i != 0 || j != 0) && isInField(x + i, y + j)) {
-                    result = cpu!![x + i][y + j].trueStatus != Status.unbroken && (result)
+                    result = cpu[x + i][y + j].trueStatus != Status.unbroken && result
                 }
             }
         }
         return result
-    }
-
-    private fun isInField(x: Int, y: Int): Boolean {
-        return ((x < 10) && (x >= 0) && (y < 10) && (y >= 0))
     }
 
 
@@ -288,6 +282,10 @@ class Main : Application() {
         launch()
     }
 
+}
+
+fun isInField(x: Int, y: Int): Boolean {
+    return x in 0..9 && y in 0..9
 }
 
 fun main() {

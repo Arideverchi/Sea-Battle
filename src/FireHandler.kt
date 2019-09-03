@@ -10,11 +10,11 @@ import kotlin.math.max
 
 class FireHandler internal constructor(private var user: Array<Array<FieldCell>>, private var cpu: Array<Array<FieldCell>>, private var stage: Stage, private var main: Main) : EventHandler<ActionEvent> {
     private var countUserShips: Int = 10
-    private var userShips: IntArray? = intArrayOf(4, 3, 2, 1)
+    private var userShips: IntArray = intArrayOf(4, 3, 2, 1)
     private var countCpuShips: Int = 10
     private var firstSet: LinkedList<Point> = LinkedList()
-    private var mode: Mode? = Mode.reconnaissance
-    private var lastHit: Point? = Point()
+    private var mode: Mode? = Mode.RECONNAISSANCE
+    private var lastHit: Point = Point()
     override fun handle(event: ActionEvent) {
         val cell = event.source as FieldCell
         when (cell.trueStatus) {
@@ -38,8 +38,8 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
 
     private fun makeAMove() {
         when (mode) {
-            Mode.reconnaissance -> searchEnemy()
-            Mode.denying -> deny()
+            Mode.RECONNAISSANCE -> searchEnemy()
+            Mode.EXECUTION -> execute()
         }
     }
 
@@ -53,7 +53,7 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
                     countUserShips--
                     searchEnemy()
                 }
-                Status.injured -> deny()
+                Status.injured -> execute()
                 Status.missed -> firstSet.removeAt(a)
             }
             return
@@ -61,24 +61,24 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
         val point = calculateSearch()
         when (fire(point.x, point.y)) {
             Status.killed -> searchEnemy()
-            Status.injured -> deny()
+            Status.injured -> execute()
         }
     }
 
-    private fun deny() {
+    private fun execute() {
         var bottom: Int
         var top: Int
         var right: Int
         var left: Int
         val r = generateRMatrix()
-        val pos = injuredLengthAndOrientation(lastHit!!.x, lastHit!!.y)
+        val pos = injuredLengthAndOrientation(lastHit.x, lastHit.y)
         var target = Point(-1, -1)
         if (pos[0] == 1) {
             var max = 0
             for (i in -1..1) {
                 for (j in -1..1) {
-                    val x = lastHit!!.x + i
-                    val y = lastHit!!.y + j
+                    val x = lastHit.x + i
+                    val y = lastHit.y + j
                     if (isInField(x, y) && abs(i) != abs(j) && r[x][y] > max) {
                         max = r[x][y]
                         target = Point(x, y)
@@ -88,9 +88,9 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
         } else {
             when (pos[1]) {
                 0 -> {
-                    val x = lastHit!!.x
+                    val x = lastHit.x
                     run {
-                        left = lastHit!!.y
+                        left = lastHit.y
                         right = left
                     }
                     while (left >= 0 && user[x][left].showStatus == Status.injured) {
@@ -109,9 +109,9 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
                     }
                 }
                 1 -> {
-                    val y = lastHit!!.y
+                    val y = lastHit.y
                     run {
-                        top = lastHit!!.x
+                        top = lastHit.x
                         bottom = top
                     }
                     while (top >= 0 && user[top][y].showStatus == Status.injured) {
@@ -132,9 +132,9 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
             }
         }
         when (fire(target.x, target.y)) {
-            Status.injured -> deny()
+            Status.injured -> execute()
             Status.killed -> {
-                mode = Mode.reconnaissance
+                mode = Mode.RECONNAISSANCE
                 searchEnemy()
             }
         }
@@ -174,27 +174,23 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
             Status.unbroken -> {
                 user[x][y].showStatus = (Status.injured)
                 if (checkKilled(x, y, user)) {
-                    userShips!![killShip(x, y, user) - 1]--
+                    userShips[killShip(x, y, user) - 1]--
                     countUserShips--
                     if (countUserShips == 0) {
-                        var i = 0
-                        while (i < 10) {
-                            var j = 0
-                            while (j < 10) {
+                        for (i in 0..9) {
+                            for (j in 0..9) {
                                 cpu[i][j].showStatus = cpu[i][j].trueStatus!!
-                                j++
                             }
-                            i++
                         }
                         showResult("I won!")
                         return Status.clear
                     }
-                    mode = Mode.reconnaissance
+                    mode = Mode.RECONNAISSANCE
                     return Status.killed
                 } else {
-                    mode = Mode.denying
-                    lastHit!!.x = x
-                    lastHit!!.y = y
+                    mode = Mode.EXECUTION
+                    lastHit.x = x
+                    lastHit.y = y
                     return Status.injured
                 }
             }
@@ -227,7 +223,7 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
             for (j in 0..9) {
                 for (orientation in 0..1) {
                     for (size in 0..3) {
-                        for (k in 1..userShips!![size]) {
+                        for (k in 1..userShips[size]) {
                             if (size == 0 && orientation == 1) continue
                             if (trySet(i, j, orientation, size + 1)) {
                                 place(i, j, orientation, size + 1, r)
@@ -243,17 +239,13 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
     private fun place(x: Int, y: Int, orientation: Int, length: Int, r: Array<IntArray>) {
         when (orientation) {
             0 -> {
-                var i = 0
-                while (i < length) {
+                for (i in 0 until length) {
                     r[x][y + i]++
-                    i++
                 }
             }
             1 -> {
-                var i = 0
-                while (i < length) {
+                for (i in 0 until length) {
                     r[x + i][y]++
-                    i++
                 }
             }
         }
@@ -262,106 +254,76 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
     private fun trySet(x: Int, y: Int, orientation: Int, length: Int): Boolean {
         when (orientation) {
             0 -> {
-                if (y + length >= 11) return false
-                var i = 0
-                while (i < length) {
-                    if (!checkField(x, y + i)) return false
-                    i++
+                if (y + length > 10) return false
+                for (i in 0 until length) {
+                    if (!checkField(user[x][y + i])) return false
                 }
             }
             1 -> {
                 if (x + length > 10) return false
-                var i = 0
-                while (i < length) {
-                    if (!checkField(x + i, y)) {
-                        return false
-                    }
-                    i++
+                for (i in 0 until length) {
+                    if (!checkField(user[x + i][y])) return false
                 }
             }
         }
         return true
     }
 
-    private fun checkField(x: Int, y: Int): Boolean {
-        return user[x][y].trueStatus != Status.missed && user[x][y].trueStatus != Status.killed
+    private fun checkField(cell: FieldCell): Boolean {
+        return cell.trueStatus != Status.missed && cell.trueStatus != Status.killed
     }
 
+    private fun checkEmpty(cell: FieldCell): Boolean = cell.showStatus == Status.missed || cell.showStatus == Status.clear
 
     private fun checkKilled(x: Int, y: Int, field: Array<Array<FieldCell>>): Boolean {
-
-        var i = x
-
-        while (i < 10) {
-            if (field[i][y].trueStatus == Status.unbroken) {
-                return false
+        for (xi in -1..1) {
+            for (yi in -1..1) {
+                if (abs(xi) == abs(yi)) continue
+                var xCurr = x
+                var yCurr = y
+                while (isInField(xCurr, yCurr)) {
+                    if (field[xCurr][yCurr].trueStatus == Status.unbroken) {
+                        return false
+                    }
+                    if (checkEmpty(field[xCurr][yCurr])) {
+                        break
+                    }
+                    xCurr += xi
+                    yCurr += yi
+                }
             }
-            if (field[i][y].showStatus == Status.missed || field[i][y].showStatus == Status.clear) {
-                break
-            }
-            ++i
-        }
-        i = x
-        while (i >= 0) {
-            if (field[i][y].trueStatus == Status.unbroken) {
-                return false
-            }
-            if (field[i][y].showStatus == Status.missed || field[i][y].showStatus == Status.clear) {
-                break
-            }
-            --i
-        }
-        i = y
-        while (i <= 9) {
-            if (field[x][i].trueStatus == Status.unbroken) {
-                return false
-            }
-            if (field[x][i].showStatus == Status.missed || field[x][i].showStatus == Status.clear) {
-                break
-            }
-            ++i
-        }
-        i = y
-        while (i > -1) {
-            if (field[x][i].trueStatus == Status.unbroken) {
-                return false
-            }
-            if (field[x][i].showStatus == Status.missed || field[x][i].showStatus == Status.clear) {
-                break
-            }
-            --i
         }
         return true
     }
 
-    private fun killShip(x: Int, y: Int, field: Array<Array<FieldCell>>?): Int {
+    private fun killShip(x: Int, y: Int, field: Array<Array<FieldCell>>): Int {
         killCell(x, y, field)
         var result = 1
         var i = x
-        while (isInField(++i, y) && field!![i][y].showStatus == Status.injured) {
+        while (isInField(++i, y) && field[i][y].showStatus == Status.injured) {
             killCell(i, y, field)
             result++
         }
         i = x
-        while (isInField(--i, y) && field!![i][y].showStatus == Status.injured) {
+        while (isInField(--i, y) && field[i][y].showStatus == Status.injured) {
             killCell(i, y, field)
             result++
         }
         i = y
-        while (isInField(x, ++i) && field!![x][i].showStatus == Status.injured) {
+        while (isInField(x, ++i) && field[x][i].showStatus == Status.injured) {
             killCell(x, i, field)
             result++
         }
         i = y
-        while (isInField(x, --i) && field!![x][i].showStatus == Status.injured) {
+        while (isInField(x, --i) && field[x][i].showStatus == Status.injured) {
             killCell(x, i, field)
             result++
         }
         return result
     }
 
-    private fun killCell(x: Int, y: Int, field: Array<Array<FieldCell>>?) {
-        field!![x][y].showStatus = Status.killed
+    private fun killCell(x: Int, y: Int, field: Array<Array<FieldCell>>) {
+        field[x][y].showStatus = Status.killed
         for (i in -1..1) {
             for (j in -1..1) {
                 if (i == 0 && j == 0) continue
@@ -370,10 +332,6 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
                 }
             }
         }
-    }
-
-    private fun isInField(x: Int, y: Int): Boolean {
-        return x in 0..9 && y in 0..9
     }
 
     private fun showResult(message: String) {
@@ -399,5 +357,5 @@ class FireHandler internal constructor(private var user: Array<Array<FieldCell>>
     }
 }
 
-internal enum class Mode { reconnaissance, denying }
+internal enum class Mode { RECONNAISSANCE, EXECUTION }
 internal data class Point(var x: Int = 0, var y: Int = 0)

@@ -1,10 +1,10 @@
 package org.akar;
 
-import javafx.event.Event;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Label;
 
-class UserAddShipHandler<T extends Event> implements EventHandler {
+class UserAddShipHandler implements EventHandler<ActionEvent> {
     Integer length;
     Label count;
     Main main;
@@ -24,7 +24,7 @@ class UserAddShipHandler<T extends Event> implements EventHandler {
     }
 
     @Override
-    public void handle(Event event) {
+    public void handle(ActionEvent event) {
         FieldCell button = ((FieldCell) event.getSource());
 		if (!trySet(button.x, button.y) || count.getText().equals("0")) {
 			return;

@@ -3,7 +3,8 @@ package org.akar;
 import javafx.scene.control.Button;
 
 class FieldCell extends Button {
-    int x, y;
+    int x;
+    int y;
     private Status showStatus;
     Status trueStatus;
 

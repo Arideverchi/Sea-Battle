@@ -2,15 +2,19 @@ package org.akar;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Objects;
+import java.util.Random;
 
-import javafx.event.Event;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
-public class FireHandler<T extends Event> implements EventHandler {
-    FieldCell[][] user, cpu;
+public class FireHandler implements EventHandler<ActionEvent> {
+    public static final Random RANDOM = new Random();
+    FieldCell[][] user;
+    FieldCell[][] cpu;
     Integer countUserShips = 10;
     int[] userShips = {4, 3, 2, 1};
     Integer countCpuShips = 10;
@@ -21,7 +25,7 @@ public class FireHandler<T extends Event> implements EventHandler {
     Mode mode = Mode.RECONNAISSANCE;
     Point lastHit = new Point();
 
-    FireHandler(FieldCell user[][], FieldCell cpu[][], Stage stage, Main main) {
+    FireHandler(FieldCell[][] user, FieldCell[][] cpu, Stage stage, Main main) {
         this.user = user;
         this.cpu = cpu;
         this.stage = stage;
@@ -37,7 +41,7 @@ public class FireHandler<T extends Event> implements EventHandler {
     }
 
     @Override
-    public void handle(Event event) {
+    public void handle(ActionEvent event) {
         FieldCell cell = (FieldCell) event.getSource();
         switch (cell.trueStatus) {
             case CLEAR:
@@ -58,13 +62,10 @@ public class FireHandler<T extends Event> implements EventHandler {
     }
 
     private void makeAMove() {
-        switch (mode) {
-            case RECONNAISSANCE:
-                searchEnemy();
-                break;
-            case DENYING:
-                deny();
-                break;
+        if (Objects.requireNonNull(mode) == Mode.RECONNAISSANCE) {
+            searchEnemy();
+        } else if (mode == Mode.DENYING) {
+            deny();
         }
     }
 
@@ -73,7 +74,7 @@ public class FireHandler<T extends Event> implements EventHandler {
             return;
         }
         if (countUserShips.equals(10)) {
-            int a = (int) (Math.random() * firstSet.size());
+            int a =  RANDOM.nextInt(firstSet.size());
             Point point = firstSet.get(a);
             switch (fire(point.x, point.y)) {
                 case KILLED:
@@ -105,8 +106,8 @@ public class FireHandler<T extends Event> implements EventHandler {
         int top;
         int right;
         int left;
-        int r[][] = generateRMatrix();
-        int pos[] = InjuredLengthAndOrientation(lastHit.x, lastHit.y);
+        int[][] r = generateRMatrix();
+        int[] pos = injuredLengthAndOrientation(lastHit.x, lastHit.y);
         Point target = new Point(-1, -1);
         if (pos[0] == 1) {
             int max = 0;
@@ -176,8 +177,8 @@ public class FireHandler<T extends Event> implements EventHandler {
         }
     }
 
-    private int[] InjuredLengthAndOrientation(int x, int y) {
-        int result[] = {1, 0};
+    private int[] injuredLengthAndOrientation(int x, int y) {
+        int[] result = {1, 0};
         int i = x;
         while (isInField(++i, y) && user[i][y].getShowStatus().equals(Status.INJURED)) {
             result[0]++;
@@ -242,7 +243,7 @@ public class FireHandler<T extends Event> implements EventHandler {
     }
 
     private Point calculateSearch() {
-        int r[][] = generateRMatrix();
+        int[][] r = generateRMatrix();
         int max = 0;
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
@@ -258,12 +259,12 @@ public class FireHandler<T extends Event> implements EventHandler {
                 }
             }
         }
-        int a = (int) (Math.random() * list.size());
+        int a = RANDOM.nextInt(list.size());
         return list.get(a);
     }
 
     private int[][] generateRMatrix() {
-        int r[][] = new int[10][10];
+        int[][] r = new int[10][10];
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 for (int orientation = 0; orientation < 2; orientation++) {

@@ -1,6 +1,7 @@
 package org.akar;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -21,6 +22,9 @@ import javafx.stage.Stage;
  * The Great Sea Battle app
  */
 public class Main extends Application {
+
+    public static final Random RANDOM = new Random();
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -57,7 +61,7 @@ public class Main extends Application {
                 root.getChildren().removeAll(Arrays.asList(addShip));
                 root.getChildren().removeAll(Arrays.asList(addShipCount));
                 fillCpuField();
-                FireHandler<ActionEvent> fireHandler = new FireHandler<>(user, cpu, mainStage, this);
+                FireHandler fireHandler = new FireHandler(user, cpu, mainStage, this);
                 for (int i = 0; i < 10; i++) {
                     for (int j = 0; j < 10; j++) {
                         //cpu[i][j].setShowStatus(cpu[i][j].trueStatus);// TODO: 10.12.2015 hide this in the end
@@ -155,7 +159,7 @@ public class Main extends Application {
         orientation = new Button("H");
         user = new FieldCell[10][10];
         cpu = new FieldCell[10][10];
-        addShipHandler = new UserAddShipHandler<>(this);
+        addShipHandler = new UserAddShipHandler(this);
 
 
         for (int i = 0; i < 10; i++) {
@@ -210,9 +214,9 @@ public class Main extends Application {
 					continue;
 				}
                 do {
-                    int orientation = (int) (Math.random() * 2.0);
-                    int side = (int) (Math.random() * 2.0);
-                    int pos = (int) (Math.random() * (11.0 - i));
+                    int orientation =  RANDOM.nextInt(2);
+                    int side = RANDOM.nextInt(2);
+                    int pos =  RANDOM.nextInt(11 - i);
                     int x = pos * orientation + 9 * side * Math.abs(orientation - 1);
                     int y = pos * Math.abs(orientation - 1) + 9 * side * orientation;
                     flag = trySet(x, y, orientation, i);
@@ -224,7 +228,7 @@ public class Main extends Application {
             }
         }
         do {
-            int orientation = (int) (Math.random() * 2.0);
+            int orientation = RANDOM.nextInt(2);
             int x = (int) (Math.random() * 8.0) + 1;
             int y = (int) (Math.random() * 8.0) + 1;
             flag = trySet(x, y, orientation, 2);
@@ -289,8 +293,8 @@ public class Main extends Application {
         return Boolean.TRUE;
     }
 
-    private Boolean checkField(int x, int y) {
-        Boolean result = Boolean.TRUE;
+    private boolean checkField(int x, int y) {
+        boolean result = Boolean.TRUE;
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 if ((i != 0 || j != 0) && isInField(x + i, y + j)) {
